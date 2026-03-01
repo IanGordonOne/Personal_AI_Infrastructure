@@ -11,6 +11,7 @@
 
 import { homedir } from 'os';
 import { join } from 'path';
+import { readFileSync } from 'fs';
 
 /**
  * Expand shell variables in a path string
@@ -72,4 +73,20 @@ export function getSkillsDir(): string {
  */
 export function getMemoryDir(): string {
   return paiPath('MEMORY');
+}
+
+/**
+ * Get the LogSeq graph path for TELOS sync.
+ * Reads logseq.telosGraphPath from settings.json.
+ * Returns null if not configured.
+ */
+export function getLogseqTelosGraphPath(): string | null {
+  try {
+    const settings = JSON.parse(readFileSync(getSettingsPath(), 'utf-8'));
+    return settings.logseq?.telosGraphPath
+      ? expandPath(settings.logseq.telosGraphPath)
+      : null;
+  } catch {
+    return null;
+  }
 }

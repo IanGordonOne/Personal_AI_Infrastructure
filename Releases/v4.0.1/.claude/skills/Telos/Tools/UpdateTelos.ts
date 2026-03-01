@@ -34,11 +34,12 @@
  * - WRONG.md - Things I was wrong about
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getPrincipal } from '../../../hooks/lib/identity';
+import { paiPath } from '../../../hooks/lib/paths';
 
-const TELOS_DIR = join(process.env.HOME!, '.claude', 'context', 'life', 'telos');
+const TELOS_DIR = paiPath('USER', 'TELOS');
 const BACKUPS_DIR = join(TELOS_DIR, 'backups');
 const UPDATES_FILE = join(TELOS_DIR, 'updates.md');
 
@@ -110,6 +111,9 @@ async function main() {
   }
 
   // Step 1: Create timestamped backup
+  if (!existsSync(BACKUPS_DIR)) {
+    mkdirSync(BACKUPS_DIR, { recursive: true });
+  }
   const timestamp = getPacificTimestamp();
   const backupFilename = filename.replace('.md', `-${timestamp}.md`);
   const backupPath = join(BACKUPS_DIR, backupFilename);

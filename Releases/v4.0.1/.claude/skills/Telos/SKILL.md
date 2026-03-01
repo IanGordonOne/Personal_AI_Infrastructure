@@ -44,6 +44,8 @@ Running the **WorkflowName** workflow in the **Telos** skill to ACTION...
 | **InterviewExtraction** | "extract content", "extract interviews", "analyze interviews" | `Workflows/InterviewExtraction.md` |
 | **CreateNarrativePoints** | "create narrative", "narrative points", "TELOS report", "n=24" | `Workflows/CreateNarrativePoints.md` |
 | **WriteReport** | "write report", "McKinsey report", "create TELOS report", "professional report" | `Workflows/WriteReport.md` |
+| **SyncToGraph** | "sync TELOS to LogSeq", "update LogSeq graph", "TELOS graph" | `Workflows/SyncToGraph.md` |
+| **TELOS Linker** | "link TELOS page", "insert TELOS link" (in LogSeq) | LogSeq plugin: `/telos-link`, toolbar "T" button, or `Cmd+Shift+T` |
 
 **Note:** For general project analysis, dashboards, dependency mapping, and executive summaries, the skill handles these directly without a separate workflow file.
 
@@ -180,6 +182,19 @@ The workflow provides:
 
 **Valid files for updates:**
 BELIEFS.md, BOOKS.md, CHALLENGES.md, FRAMES.md, GOALS.md, LEARNED.md, MISSION.md, MODELS.md, MOVIES.md, NARRATIVES.md, PREDICTIONS.md, PROBLEMS.md, PROJECTS.md, STRATEGIES.md, TELOS.md, TRAUMAS.md, WISDOM.md, WRONG.md
+
+### Graph Sync (LogSeq)
+
+Export TELOS files to a LogSeq graph for interactive browsing with backlinks and cross-references.
+
+**Workflow:** `Workflows/SyncToGraph.md`
+
+**Setup:** Add `logseq.telosGraphPath` to `~/.claude/settings.json`. See workflow docs for details.
+
+**Key points:**
+- One-way sync: TELOS markdown → LogSeq (markdown stays the source of truth)
+- Creates `TELOS/` namespaced pages with cross-links between TELOS concepts
+- LogSeq is optional — nothing breaks if it's not configured
 
 ---
 
