@@ -1,0 +1,6 @@
+{
+  "owner": "<your-github-user>",
+  "repo": "homebrew-tap",
+  "tap_name": "<your-github-user>/tap",
+  "note": "Configure with your GitHub username"
+}
