@@ -62,32 +62,22 @@ Route to the appropriate workflow based on the request.
 
 **CRITICAL:** For due diligence, company/person background checks, or vetting -> **INVOKE OSINT SKILL INSTEAD**
 
-### Research Modes (Primary Workflows)
-- Quick/minor research (1 Perplexity, 1 query) -> `Workflows/QuickResearch.md`
-- Standard research - DEFAULT (3 agents: Perplexity + Claude + Gemini) -> `Workflows/StandardResearch.md`
-- Extensive research (4 types x 3 threads = 12 agents) -> `Workflows/ExtensiveResearch.md`
-- Deep investigation / iterative research (progressive deepening, loop-compatible) -> `Workflows/DeepInvestigation.md`
-
-### Deep Content Analysis
-- Extract alpha / deep analysis / highest-alpha insights -> `Workflows/ExtractAlpha.md`
-
-### Content Retrieval
-- Difficulty accessing content (CAPTCHA, bot detection, blocking) -> `Workflows/Retrieve.md`
-- YouTube URL extraction (use `fabric -y URL` immediately) -> `Workflows/YoutubeExtraction.md`
-- Web scraping -> `Workflows/WebScraping.md`
-
-### Specific Research Types
-- Claude WebSearch only (free, no API keys) -> `Workflows/ClaudeResearch.md`
-- Perplexity API research (use Quick for single-agent) -> `Workflows/QuickResearch.md`
-- Interview preparation (Tyler Cowen style) -> `Workflows/InterviewResearch.md`
-- AI trends analysis -> `Workflows/AnalyzeAiTrends.md`
-
-### Fabric Pattern Processing
-- Use Fabric patterns (242+ specialized prompts) -> `Workflows/Fabric.md`
-
-### Content Enhancement
-- Enhance/improve content -> `Workflows/Enhance.md`
-- Extract knowledge from content -> `Workflows/ExtractKnowledge.md`
+| Trigger | Workflow | Description |
+|---------|----------|-------------|
+| Quick/minor research | [QuickResearch](Workflows/QuickResearch.md) | 1 Perplexity agent, 1 query |
+| Standard research (DEFAULT) | [StandardResearch](Workflows/StandardResearch.md) | 3 agents: Perplexity + Claude + Gemini |
+| Extensive research | [ExtensiveResearch](Workflows/ExtensiveResearch.md) | 4 types x 3 threads = 12 agents |
+| Deep investigation / iterative | [DeepInvestigation](Workflows/DeepInvestigation.md) | Progressive deepening, loop-compatible |
+| Extract alpha / deep analysis | [ExtractAlpha](Workflows/ExtractAlpha.md) | Highest-alpha insights from content |
+| Difficulty accessing content | [Retrieve](Workflows/Retrieve.md) | CAPTCHA, bot detection, blocking workarounds |
+| YouTube URL extraction | [YoutubeExtraction](Workflows/YoutubeExtraction.md) | Use `fabric -y URL` immediately |
+| Web scraping | [WebScraping](Workflows/WebScraping.md) | Scrape web content |
+| Claude WebSearch only | [ClaudeResearch](Workflows/ClaudeResearch.md) | Free, no API keys required |
+| Interview preparation | [InterviewResearch](Workflows/InterviewResearch.md) | Tyler Cowen style preparation |
+| AI trends analysis | [AnalyzeAiTrends](Workflows/AnalyzeAiTrends.md) | Monitor AI ecosystem trends |
+| Use Fabric patterns | [Fabric](Workflows/Fabric.md) | 242+ specialized prompt patterns |
+| Enhance/improve content | [Enhance](Workflows/Enhance.md) | Content enhancement and refinement |
+| Extract knowledge | [ExtractKnowledge](Workflows/ExtractKnowledge.md) | Knowledge extraction from content |
 
 ---
 
@@ -153,3 +143,31 @@ See `Workflows/DeepInvestigation.md` for full workflow details.
 - This ties research artifacts to the work item for learning and context
 
 **History (permanent):** `~/.claude/History/research/YYYY-MM/YYYY-MM-DD_[topic]/`
+
+---
+
+## Examples
+
+**Example 1: Quick factual lookup**
+```
+User: "Quick research: what's the current Claude API rate limit for Tier 1?"
+-> Invokes QuickResearch workflow (1 Perplexity agent, 1 query, ~10-15s)
+-> Returns direct answer with source URL, no multi-agent exploration
+```
+
+**Example 2: Standard multi-agent research**
+```
+User: "Research the latest developments in model context protocols"
+-> Invokes StandardResearch workflow (3 agents: Perplexity + Claude + Gemini in parallel, ~15-30s)
+-> Each agent queries from different angles, results are synthesized
+-> Returns comprehensive overview with verified URLs, saved to research history
+```
+
+**Example 3: Deep investigation with iterative deepening**
+```
+User: "Do a deep investigation of the AI agent market"
+-> Invokes DeepInvestigation workflow with MarketResearch.md template
+-> Iteration 1: broad landscape scan + first entity deep-dive
+-> Loop mode: each iteration deep-dives the next highest-priority entity
+-> Artifacts persist at ~/.claude/MEMORY/RESEARCH/{date}_{topic}/
+```

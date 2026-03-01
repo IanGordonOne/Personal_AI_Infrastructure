@@ -124,10 +124,11 @@ The Agents skill is a complete agent composition and management system:
 
 ## Workflow Routing
 
-**Available Workflows:**
-- **CREATECUSTOMAGENT** - Create specialized custom agents → `Workflows/CreateCustomAgent.md`
-- **LISTTRAITS** - Show available agent traits → `Workflows/ListTraits.md`
-- **SPAWNPARALLEL** - Launch parallel agents → `Workflows/SpawnParallelAgents.md`
+| Trigger | Workflow | Description |
+|---------|----------|-------------|
+| "custom agents", "spin up agents", "create agents" | [CreateCustomAgent](Workflows/CreateCustomAgent.md) | Compose specialized agents from traits + voice + specialization |
+| "what traits", "list traits", "agent personalities" | [ListTraits](Workflows/ListTraits.md) | Show available expertise, personality, and approach traits |
+| "launch agents", "spawn agents", "parallel agents" | [SpawnParallelAgents](Workflows/SpawnParallelAgents.md) | Launch multiple agents in parallel for grunt work |
 
 ## Route Triggers
 
@@ -238,6 +239,15 @@ User: "What agent personalities can you create?"
 → Invokes LISTTRAITS workflow
 → Shows merged base + user traits
 → Displays voices with prosody settings
+```
+
+**Example 3: Spawn parallel research agents**
+```
+User: "Launch 10 agents to research these companies"
+→ Invokes SPAWNPARALLEL workflow
+→ Creates 10 agents with model: "haiku" for speed
+→ Launches all in parallel, spotcheck agent verifies after completion
+→ Returns consolidated results
 ```
 
 ## Extending the Skill
