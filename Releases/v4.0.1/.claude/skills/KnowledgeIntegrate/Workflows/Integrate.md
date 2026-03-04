@@ -2,16 +2,16 @@
 
 ## Purpose
 
-Extract all discrete knowledge topics from the current session and write them as structured LogSeq pages to a target graph. The primary and most common workflow.
+Extract all discrete knowledge topics from the current session and write them as structured pages to a target knowledge graph. The primary and most common workflow.
 
 ## Trigger
 
-"integrate knowledge", "save learnings to logseq", "write knowledge pages", "capture what we learned", "integrate session"
+"integrate knowledge", "save learnings", "write knowledge pages", "capture what we learned", "integrate session"
 
 ## Prerequisites
 
 - Active session with substantive knowledge content (research, decisions, discoveries)
-- Target LogSeq graph accessible on filesystem
+- Target knowledge graph accessible on filesystem
 
 ## Procedure
 
@@ -20,21 +20,21 @@ Extract all discrete knowledge topics from the current session and write them as
 ```bash
 curl -s -X POST http://localhost:8888/notify \
   -H "Content-Type: application/json" \
-  -d '{"message": "Starting knowledge integration into LogSeq", "voice_enabled": true}' \
+  -d '{"message": "Starting knowledge integration", "voice_enabled": true}' \
   > /dev/null 2>&1 &
 ```
 
-### Step 2: Resolve Target Graph
+### Step 2: Resolve Target Graph and Backend
 
-Check if user specified a graph. If not, discover available graphs per `GraphRegistry.md`:
+Check if user specified a graph. If not, discover available graphs per `GraphRegistry.md` — this runs each backend's discovery and merges results.
 
-Run the discovery script from GraphRegistry.md to find available graphs, then apply selection rules:
-1. User-specified graph takes priority
-2. User-registered graphs (from customization file) take next priority
-3. If only one graph found, use it
-4. If multiple graphs found, present the list and ask the user
+Apply selection rules from GraphRegistry.md to choose a graph. Then:
 
-Set `GRAPH_ROOT` to the selected graph root (directory containing `pages/` and `journals/`).
+1. Set `GRAPH_ROOT` to the selected graph root
+2. Determine the backend type (per GraphRegistry.md **Backend Detection**)
+3. Load `Backends/{backend}.md` into context
+4. Set `PAGES_DIR` from the backend's **Pages Directory** section
+5. Set `JOURNAL_DIR` and `JOURNAL_PATTERN` from the backend's **Journal Path** section
 
 ### Step 3: Extract Knowledge Topics
 
@@ -49,7 +49,7 @@ Analyze session context (conversation history, files read/written, research perf
 - `title` — Clear, specific page name (e.g., "Event Sourcing Patterns" not "Architecture")
 - `category` — From `CategoryTaxonomy.md`
 - `type` — From `PageSchema.md` (knowledge, architecture, decision, reference, glossary-term)
-- `tags` — 3-5 relevant tags as `[[wikilinks]]`
+- `tags` — 3-5 relevant tags (format per active backend's **Tag Format**)
 - `related` — Cross-links to other topics in the batch AND existing graph pages
 - `signals` — Zero or more of: `plan`, `work` (see `JournalEntry.md` Step 3 for signal definitions). Assign `plan` when the topic captures a decision or intention for future work. Assign `work` when the topic documents completed implementation or progress.
 
@@ -75,42 +75,45 @@ Wait for user confirmation. Remove or adjust topics as requested.
 
 ### Step 5: Scan for Existing Pages
 
-For each approved topic, check if a page already exists:
+For each approved topic, check if a page already exists using the active backend's **Existence Check** method:
 
-```bash
-# Exact match
-ls "$GRAPH_ROOT/pages/{title}.md" 2>/dev/null
-
-# Fuzzy match for similar names
-ls "$GRAPH_ROOT/pages/" | grep -i "{keyword}" 2>/dev/null
-```
+1. Exact filename match in `$PAGES_DIR`
+2. Fuzzy search (case-insensitive) in `$PAGES_DIR`
 
 Mark each topic as **NEW** or **UPDATE** based on findings.
 
 ### Step 6: Generate and Write Pages
 
-For each topic, generate a LogSeq page following the schema in `PageSchema.md`.
+For each topic, generate a page following the abstract schema in `PageSchema.md`, rendered using the active backend's conventions:
+
+- **Property Format** — for the metadata block
+- **Section Format** — for headings and body content
+- **Tag Format** — for tags in properties and inline
+- **Date Format** — for created and last-updated values
+- **Link Format** — for cross-references
+- **Filename Convention** — for the output filename
 
 **For NEW pages:**
 - Write the full page with all properties and appropriate section template
-- Include `[[wikilinks]]` inline in body text where other topics are mentioned
-- Ensure at least 1 cross-link in `related::`
+- Include cross-links inline in body text where other topics are mentioned
+- Ensure at least 1 cross-link in `related`
 
 **For UPDATE pages:**
 1. Read existing page content
-2. Identify which sections already exist
-3. Merge: preserve existing high-quality sections, add new sections, enrich existing ones
-4. Update `last-updated::` to today
-5. Append new items to `related::` and `tags::`
-6. Never remove existing content during merge
+2. Parse properties using the active backend's **Property Format** rules
+3. Parse sections using the active backend's **Section Format** rules
+4. Merge: preserve existing high-quality sections, add new sections, enrich existing ones
+5. Update `last-updated` to today
+6. Append new items to `related` and `tags`
+7. Never remove existing content during merge
 
-Write each page to `$GRAPH_ROOT/pages/{title}.md`.
+Write each page to `$PAGES_DIR/{title}.md`.
 
 ### Step 7: Write Journal Entry
 
 Write/append today's journal entry per `Workflows/JournalEntry.md`.
 
-Journal path: `$GRAPH_ROOT/journals/{yyyy_mm_dd}.md`
+Journal path: `$GRAPH_ROOT/{JOURNAL_DIR}/{today per JOURNAL_PATTERN}`
 
 The entry links all new and updated pages with one-line summaries. Pass each topic's `signals` classification (plan/work) so the journal entry includes "Plans Made" and "Work Done" sections when applicable (see JournalEntry.md Step 3-4).
 
@@ -137,7 +140,7 @@ Provide a summary:
 ```
 ## Knowledge Integration Complete
 
-**Graph:** {graph name}
+**Graph:** {graph name} ({backend name})
 **Date:** {today}
 
 ### New Pages ({count})
@@ -161,11 +164,11 @@ Provide a summary:
 | [[Page Title]] | Implemented X — N tests passing |
 
 ### Journal Entry
-Written to journals/{yyyy_mm_dd}.md
+Written to {journal path}
 
 ### Suggested Follow-ups
-- Open LogSeq and verify page rendering
-- Check [[wikilinks]] resolve correctly
+- Open {backend name} and verify page rendering
+- Check cross-links resolve correctly
 - Review new topics for study opportunities
 ```
 
@@ -175,3 +178,4 @@ Written to journals/{yyyy_mm_dd}.md
 - **Page write failure:** Continue with remaining pages, report failures at end
 - **No extractable knowledge:** Inform user that the session may be more procedural than knowledge-oriented; suggest a handoff/follow-up skill instead
 - **Merge conflict on update:** Present both existing and new content, let user decide
+- **Unknown backend:** Ask user to specify or create a backend profile

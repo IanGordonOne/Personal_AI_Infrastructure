@@ -2,24 +2,24 @@
 
 ## Purpose
 
-Update one or more existing LogSeq knowledge pages with new information from the current session. Use when you don't need full session extraction — just want to enrich specific pages.
+Update one or more existing knowledge pages with new information from the current session. Use when you don't need full session extraction — just want to enrich specific pages.
 
 ## Trigger
 
-"update [page] in logseq", "add to [page]", "enrich knowledge page", "update the [topic] page"
+"update [page]", "add to [page]", "enrich knowledge page", "update the [topic] page"
 
 ## Procedure
 
-### Step 1: Resolve Target Graph
+### Step 1: Resolve Target Graph and Backend
 
-Same as Integrate workflow Step 2 — resolve graph from user input or default.
+Same as Integrate workflow Step 2 — resolve graph, determine backend, load backend profile, set `PAGES_DIR`.
 
 ### Step 2: Identify Target Pages
 
-Parse the user's request for specific page names. If ambiguous, search:
+Parse the user's request for specific page names. If ambiguous, search using the active backend's **Existence Check** method:
 
 ```bash
-ls "$GRAPH_ROOT/pages/" | grep -i "{search_term}"
+ls "$PAGES_DIR/" | grep -i "{search_term}"
 ```
 
 Present matches and confirm which pages to update.
@@ -27,9 +27,9 @@ Present matches and confirm which pages to update.
 ### Step 3: Read Existing Content
 
 For each target page:
-1. Read the file from `$GRAPH_ROOT/pages/{title}.md`
-2. Parse properties (everything before the first `- ##` block)
-3. Parse sections (each `- ##` heading and its children)
+1. Read the file from `$PAGES_DIR/{title}.md`
+2. Parse properties using the active backend's **Property Format** rules
+3. Parse sections using the active backend's **Section Format** rules
 4. Note which sections exist and their depth/quality
 
 ### Step 4: Determine Updates
@@ -37,8 +37,8 @@ For each target page:
 From session context, identify for each page:
 - **New sections** to add (topics not yet covered)
 - **Section enrichments** (additional bullets for existing sections)
-- **Property updates** (`last-updated::`, new `related::` links, new `tags::`)
-- **New inline `[[wikilinks]]`** discovered from session
+- **Property updates** (`last-updated`, new `related` links, new `tags`)
+- **New cross-links** discovered from session (format per active backend's **Link Format**)
 - **Signals** — classify each update as `plan`, `work`, or neither (see `JournalEntry.md` Step 3 for signal definitions). Updates that document new decisions/intentions are `plan`; updates that document completed implementations are `work`.
 
 ### Step 5: Merge and Write
@@ -47,8 +47,8 @@ Apply merge rules from `PageSchema.md`:
 - Preserve existing sections that are comprehensive
 - Add new sections after existing ones
 - Append new bullets to existing sections (don't replace)
-- Update `last-updated::` to today's date
-- Append new items to `related::` and `tags::` (don't replace)
+- Update `last-updated` to today's date (format per active backend's **Date Format**)
+- Append new items to `related` and `tags` (don't replace)
 - Never remove existing content
 
 Write the merged page back to the same file.
@@ -63,7 +63,7 @@ Add a note to today's journal entry per `JournalEntry.md`. Pass signal classific
 
 If the update carries plan or work signals, enrich per JournalEntry.md Step 4 (UpdatePages variant).
 
-If the journal file doesn't exist, create it with just this entry.
+If the journal file doesn't exist, create it.
 
 ### Step 7: Report
 

@@ -2,25 +2,17 @@
 
 ## Overview
 
-KnowledgeIntegrate writes pages to LogSeq graphs on the local filesystem. This file describes how to discover and register graphs.
+KnowledgeIntegrate writes pages to local knowledge graphs. Supported backends: **LogSeq**, **Obsidian**.
 
 ## Discovery
 
-At runtime, scan common LogSeq graph locations:
+At runtime, discover available graphs by running each backend's discovery method:
 
-```bash
-# macOS iCloud sync (LogSeq default on iOS/macOS)
-find "$HOME/Library/Mobile Documents/iCloud~com~logseq~logseq/Documents" -maxdepth 2 -name "pages" -type d 2>/dev/null | while read dir; do
-  echo "$(basename $(dirname "$dir")): AVAILABLE at $(dirname "$dir")"
-done
+1. Load `Backends/LogSeq.md` — run its **Discovery** snippet
+2. Load `Backends/Obsidian.md` — run its **Discovery** snippet
+3. Merge results into a unified list
 
-# Common local paths
-for dir in "$HOME/Documents" "$HOME/.logseq" "$HOME/logseq" "$HOME/.config"; do
-  find "$dir" -maxdepth 3 -name "pages" -type d 2>/dev/null | while read pdir; do
-    echo "$(basename $(dirname "$pdir")): AVAILABLE at $(dirname "$pdir")"
-  done
-done
-```
+Each discovery result has the format: `{name}|{backend}|{path}` — one line per graph/vault found.
 
 ## User-Registered Graphs
 
@@ -31,10 +23,10 @@ Users can register additional graphs by creating a customization file:
 Format:
 
 ```markdown
-| Name | Path | Purpose |
-|------|------|---------|
-| My KB | ~/Documents/my-knowledge-graph/ | General knowledge |
-| Work Notes | ~/Documents/work-logseq/ | Work-related knowledge |
+| Name | Path | Backend | Purpose |
+|------|------|---------|---------|
+| My KB | ~/Documents/my-knowledge-graph/ | LogSeq | General knowledge |
+| Research | ~/Documents/ObsidianVault/ | Obsidian | Research notes |
 ```
 
 User-registered graphs take priority over auto-discovered graphs.
@@ -44,11 +36,27 @@ User-registered graphs take priority over auto-discovered graphs.
 1. If user specifies a graph by name or path, use that
 2. If user has registered graphs in the customization file, prefer those
 3. If only one graph is discovered, use it automatically
-4. If multiple graphs are found, present the list and ask the user
-5. If target graph has no `pages/` directory, create it
+4. If multiple graphs are found, present the list (with backend type) and ask the user
+5. If target graph is missing the expected directory structure, create it per the active backend profile
+
+## Backend Detection
+
+For auto-discovered graphs (not user-registered), determine the backend:
+
+1. If `$GRAPH_ROOT/.obsidian/` exists → **Obsidian**
+2. If `$GRAPH_ROOT/logseq/` exists → **LogSeq**
+3. If `$GRAPH_ROOT/pages/` exists AND no `.obsidian/` → **LogSeq** (legacy heuristic)
+4. If ambiguous, ask the user
 
 ## Adding New Graphs
 
 To register a new graph, either:
 - Add a row to the user customization file above
 - Or tell the agent: "Use my graph at {path}" — it will be used for that session
+
+## Adding New Backends
+
+To support a new knowledge tool:
+1. Create `Backends/{Name}.md` following the 13-section contract (see existing backends for the template)
+2. Add its discovery snippet to the dispatch list above
+3. Add detection heuristic to the Backend Detection section

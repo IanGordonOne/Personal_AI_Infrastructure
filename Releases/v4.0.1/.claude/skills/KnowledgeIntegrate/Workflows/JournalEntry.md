@@ -2,28 +2,28 @@
 
 ## Purpose
 
-Write or append to today's LogSeq journal entry with links to knowledge pages. Can be called standalone or as part of the Integrate workflow. When knowledge content reflects plans made or work completed, the journal entry surfaces that progress alongside the knowledge capture.
+Write or append to today's journal entry with links to knowledge pages. Can be called standalone or as part of the Integrate workflow. When knowledge content reflects plans made or work completed, the journal entry surfaces that progress alongside the knowledge capture.
 
 ## Trigger
 
-"write journal entry", "today's journal", "logseq journal"
+"write journal entry", "today's journal"
 
 ## Journal Path Convention
 
-LogSeq journals use date-based filenames: `journals/{yyyy_mm_dd}.md`
-
-Example: `journals/2026_03_02.md`
+Journal path and filename pattern are defined by the active backend profile — see `Backends/{backend}.md`, section **Journal Path**.
 
 ## Procedure
 
-### Step 1: Resolve Target Graph
+### Step 1: Resolve Target Graph and Backend
 
-Same as Integrate workflow Step 2.
+Same as Integrate workflow Step 2 — resolve graph, determine backend, load backend profile.
 
 ### Step 2: Check for Existing Entry
 
+Construct today's journal filename using the active backend's **Journal Path** (directory + filename pattern). Check if the file exists:
+
 ```bash
-cat "$GRAPH_ROOT/journals/$(date +%Y_%m_%d).md" 2>/dev/null
+cat "$GRAPH_ROOT/$JOURNAL_DIR/{today's filename}" 2>/dev/null
 ```
 
 If exists, append to it. If not, create new.
@@ -46,66 +46,47 @@ Before generating content, scan the knowledge pages being written/updated for **
 
 ### Step 4: Generate Entry Content
 
+Format all journal content using the active backend's **Section Format** — the content structure (headings, sub-items) remains the same; the rendering (outliner blocks vs flat markdown) follows the backend profile.
+
 **When called from Integrate workflow:**
 
-```markdown
-- ## Knowledge Capture — {Session Topic}
-	- Source:: {project name or research topic}
-	- Pages:: {count} new, {count} updated
-	- ### New Pages
-		- [[Page One]] — {one-line summary from short:: property}
-		- [[Page Two]] — {one-line summary}
-	- ### Updated Pages
-		- [[Page Three]] — {what changed}
-	- ### Session Context
-		- {1-2 sentences about what prompted this knowledge capture}
-```
+Structure:
+- Heading: "Knowledge Capture — {Session Topic}"
+- Source: project name or research topic
+- Pages: count new, count updated
+- Sub-section: New Pages — list with one-line summaries
+- Sub-section: Updated Pages — list with what changed
+- Sub-section: Session Context — 1-2 sentences about what prompted this
 
 **When plan signals are present, append:**
 
-```markdown
-	- ### Plans Made
-		- [[Page Name]] — {what was decided or planned, in one line}
-		- [[Page Name]] — {next step or deferred item}
-```
+- Sub-section: Plans Made — list of decisions/intentions, one line each
 
 **When work signals are present, append:**
 
-```markdown
-	- ### Work Done
-		- [[Page Name]] — {what was completed, in one line}
-		- [[Page Name]] — {implementation milestone reached}
-```
+- Sub-section: Work Done — list of completions/milestones, one line each
 
 Both sections are optional — include only when signals are detected. A session may have plans only, work only, both, or neither (pure knowledge capture).
 
 **When called standalone:**
 
-```markdown
-- ## {Entry Title}
-	- {Content as outliner blocks}
-	- Related:: [[Page One]], [[Page Two]]
-```
+Structure:
+- Heading: "{Entry Title}"
+- Content as sub-items
+- Related page links
 
 **When called from UpdatePages workflow:**
 
-```markdown
-- Updated [[Page Name]] — {what changed}
-```
-
-If the update contains plan or work signals, enrich the entry:
-
-```markdown
-- Updated [[Page Name]] — {what changed}
-	- PLANNED: {decision or intention, if plan signal}
-	- DONE: {completion or milestone, if work signal}
-```
+Structure:
+- "Updated [[Page Name]] — {what changed}"
+- If plan signal: "PLANNED: {decision or intention}"
+- If work signal: "DONE: {completion or milestone}"
 
 ### Step 5: Write
 
 - If journal file exists: append new content after existing content
 - If journal file doesn't exist: create with the new content
-- Use LogSeq outliner format: `- ` prefixed blocks, tab-indented children
+- Use the active backend's **Section Format** for all content
 
 ### Step 6: Confirm
 
