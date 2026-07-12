@@ -1,0 +1,19 @@
+name: containment
+# Server-side containment gate (bd claude-ua3 Phase 0).
+# The ONLY control that survives a fresh clone AND `git push --no-verify`, because
+# it runs on GitHub's runners on every push/PR — unlike a local .git/hooks gate.
+# Patterns come from a repo SECRET (PRINCIPAL_IDENTITY_PATTERNS, newline-separated)
+# so this public repo never contains the identity strings it screens for.
+on:
+  push:
+  pull_request:
+
+jobs:
+  principal-identity-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Screen tracked files for the principal's identity
+        env:
+          PRINCIPAL_IDENTITY_PATTERNS: ${{ secrets.PRINCIPAL_IDENTITY_PATTERNS }}
+        run: bash scripts/containment-scan.sh
